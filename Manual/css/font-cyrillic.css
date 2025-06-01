@@ -1,0 +1,45 @@
+/* Main Font */
+@font-face {
+  font-family: 'Old Soviet';
+  src: url('../font/Old-Soviet.otf');
+}
+
+/* Main Fallback Font */
+@font-face {
+    font-family: 'JMH Typewriter dry';
+    src: url('../font/JMH-Typewriter-dry.otf');
+}
+
+/* For fancy [RU]Souvenir */
+@font-face {
+    font-family: 'Agency FB';
+    src: url('../font/agencyfbcyrillic.ttf');
+}
+
+
+
+/* Russian font preset, intended to be used as default */
+*[lang='ru'], *[lang='bg'] {
+    font-family: 'Old Soviet',
+                 'JMH Typewriter dry',
+                 'Courier New';
+    font-size: 0.875em;
+}
+
+/* Upscales all img tags
+ * In case it still doesn't work or it needs to be applied elsewhere,
+ * then use ru-resetscale */
+img.diagram, .ru-resetscale {
+    transform: scale(1.143);
+}
+
+.smaller-font {
+    font-size: 0.8125em;
+}
+
+/* Sets element font family to english default fonts
+ * Keep in mind, this class only forces font-family
+ * and leaves other font propreties as-is */
+.ru-setfontse {
+    font-family: 'Special Elite', 'Courier New', monospace;
+}
