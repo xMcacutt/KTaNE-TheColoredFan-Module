@@ -14,7 +14,7 @@ MonoBehaviour:
   id: theColoredFan
   title: The Colored Fan
   author: xMcacutt
-  description: 'The Colored Fan v1.0.1
+  description: 'The Colored Fan v1.0.4
 
     Like a record baby.
 
@@ -22,6 +22,6 @@ MonoBehaviour:
     - TP Support -
 
     - Colorblind Mode -'
-  version: 1.0.1
+  version: 1.0.4
   outputFolder: build
   previewImage: {fileID: 2800000, guid: a99c6bf16601cce469b247a0587ce02e, type: 3}

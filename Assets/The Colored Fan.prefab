@@ -2877,7 +2877,9 @@ MonoBehaviour:
   - {fileID: 102291043586392626}
   - {fileID: 102347646476465452}
   FanColorTextMesh: {fileID: 102875959889252138}
+  isSolved: 0
   _fanTargetSpeed: 0
+  initialSpeed: 0
 --- !u!114 &114653223027125092
 MonoBehaviour:
   m_ObjectHideFlags: 1

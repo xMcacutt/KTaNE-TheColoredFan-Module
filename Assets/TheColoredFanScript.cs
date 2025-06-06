@@ -3,10 +3,9 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using System.Linq;
+using System.Text;
 using System.Text.RegularExpressions;
 using KModkit;
-using NUnit.Framework;
-using NUnit.Framework.Constraints;
 using UnityEngine.Serialization;
 using Random = System.Random;
 
@@ -154,13 +153,15 @@ public class TheColoredFanScript : MonoBehaviour
         }
         
         var symbolColors = new List<string> { initialSpeedColor, goalSpeedColor };
-        foreach (var factor in _factorsToAvoid)
+	    var factorColors = ColorNames.Where(x => x != initialSpeedColor && x != goalSpeedColor).OrderBy(_ => _random.Next()).ToArray();
+	    var factorIndex = 0;
+	    foreach (var factor in _factorsToAvoid)
         {
-	        var color = ColorNames.Where(x => x != initialSpeedColor && x != goalSpeedColor).PickRandom();
-	        var displayValue = factor + factorModificationTable[fanBladeColorIndex, Array.IndexOf(ColorNames, color)] - 1;
+	        var displayValue = factor + factorModificationTable[fanBladeColorIndex, Array.IndexOf(ColorNames, factorColors[0])] - 1;
 	        displayValue = (displayValue + 26) % 26;
 	        symbols.Add(fanLetters[displayValue]);
-	        symbolColors.Add(color);
+	        symbolColors.Add(factorColors[factorIndex]);
+	        factorIndex++;
         }
 
         char[] symbolsShuffled;
@@ -168,12 +169,12 @@ public class TheColoredFanScript : MonoBehaviour
         ShuffleSymbols(symbols.ToArray(), symbolColors.ToArray(), out symbolsShuffled, out symbolColorsShuffled);
         SetSymbolColors(symbolsShuffled, symbolColorsShuffled);
         
-        Debug.Log("[The Colored Fan" + moduleId + "] Initial Speed is: " + initialSpeed);
-        Debug.Log("[The Colored Fan" + moduleId + "] Goal Speed is: " + _goalSpeed);
-        Debug.Log("[The Colored Fan" + moduleId + "] Factors to avoid: " + _factorsToAvoid.Join());
-        Debug.Log("[The Colored Fan" + moduleId + "] Button values: " + _buttonValues.Join());
-        Debug.Log("[The Colored Fan" + moduleId + "] Symbol Letters: " + symbols.Join().ToUpper());
-        Debug.Log("[The Colored Fan" + moduleId + "] Symbol Colors: " + symbolColors.Join());
+        Debug.LogFormat("[The Colored Fan #{0}] Initial Speed is: {1}", moduleId, initialSpeed);
+        Debug.LogFormat("[The Colored Fan #{0}] Goal Speed is: {1}", moduleId, _goalSpeed);
+        Debug.LogFormat("[The Colored Fan #{0}] Factors to avoid: {1}", moduleId, _factorsToAvoid.Join());
+        Debug.LogFormat("[The Colored Fan #{0}] Button values: {1}", moduleId, _buttonValues.Join());
+        Debug.LogFormat("[The Colored Fan #{0}] Symbol Letters: {1}", moduleId, symbols.Join().ToUpper());
+        Debug.LogFormat("[The Colored Fan #{0}] Symbol Colors: {1}", moduleId, symbolColors.Join());
 	}
 
 	void Start ()
@@ -222,7 +223,7 @@ public class TheColoredFanScript : MonoBehaviour
 			if (Math.Abs(_fanSpeed) < 0.05f && _fanTargetSpeed == 0)
 				_fanSpeed = 0;
 			_fanSpeed = Mathf.Clamp(_fanSpeed, -500, 500);
-			fanBlades.transform.Rotate(Vector3.up, _fanSpeed);
+			fanBlades.transform.Rotate(Vector3.up, _fanSpeed * 0.7f);
 			
 			var main = MistParticles.main;
 			main.startSpeed = Mathf.Clamp(Math.Abs(_fanTargetSpeed), 0.2f, 10f);
@@ -267,7 +268,7 @@ public class TheColoredFanScript : MonoBehaviour
 		Audio.PlayGameSoundAtTransform(KMSoundOverride.SoundEffect.ButtonPress, buttons[index].transform);
 		if (isSolved) return false;
 		_fanTargetSpeed += _buttonValues[index];
-		Debug.Log("[The Colored Fan" + moduleId + "] Speed changed by " + _buttonValues[index] + " to new speed " + _fanTargetSpeed);
+		Debug.LogFormat("[The Colored Fan #{0}] Speed changed by {1} to new speed {2}", moduleId, _buttonValues[index], _fanTargetSpeed);
 		if (Math.Abs(_fanTargetSpeed) > 1000 || Math.Abs(_fanTargetSpeed - _goalSpeed) < 0.01)
 		{
 			_fanSpeed = Mathf.Min(_fanSpeed, 50);
@@ -287,7 +288,7 @@ public class TheColoredFanScript : MonoBehaviour
 		if (_factorsToAvoid.All(factor => Mathf.RoundToInt(_fanTargetSpeed) % factor != 0))
 			return false;
 		
-		Debug.Log("[The Colored Fan" + moduleId + "] Strike " + _fanTargetSpeed + " is divisible by " + _factorsToAvoid.First(factor => _fanTargetSpeed % factor == 0));
+		Debug.LogFormat("[The Colored Fan #{0}] Strike! {1} is divisible by {2}", moduleId, _fanTargetSpeed, _factorsToAvoid.First(factor => _fanTargetSpeed % factor == 0));		
 		
 		Module.HandleStrike();
 		return false;
