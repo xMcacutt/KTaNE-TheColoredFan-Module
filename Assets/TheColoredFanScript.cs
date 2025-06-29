@@ -66,7 +66,7 @@ public class TheColoredFanScript : MonoBehaviour
 
 	private int[] _possibleFactors = { 3, 4, 6, 7, 8, 9, 10, 12 };
 	private int[] _factorsToAvoid;
-	public int initialSpeed;
+	[FormerlySerializedAs("initialSpeed")] public int _initialSpeed;
 	private int _goalSpeed;
 	private int[] _buttonValues;
 	
@@ -76,19 +76,25 @@ public class TheColoredFanScript : MonoBehaviour
         _direction = 1;
         _isOn = true;
         
-        initialSpeed = _random.Next(-26, 26);
-
-        var initialSign = initialSpeed >= 0 ? 1 : -1;
+        var initialMagnitude = _random.Next(0, 27);
+        var initialSign = _random.Next(0, 2) == 0 ? 1 : -1;
+        if (initialMagnitude == 0)
+	        initialSign = 1;
         var goalSign = -initialSign;
-        var minGoalMagnitude = Math.Abs(initialSpeed) + 5;
-        if (minGoalMagnitude > 25)
-	        minGoalMagnitude = 5;
-        var goalMagnitude = _random.Next(minGoalMagnitude, 26);
+        
+        const int minDifference = 8;
+        var goalMagnitude = _random.Next(0, 27);
+        while (initialMagnitude + goalMagnitude < minDifference)
+	        goalMagnitude++;
         _goalSpeed = goalSign * goalMagnitude;
 
-        if (_goalSpeed == 0 || initialSpeed == 0)
+        if (goalMagnitude == 0)
+	        initialSign = -1;
+        _initialSpeed = initialMagnitude * initialSign;
+        
+        if (_goalSpeed == 0 || _initialSpeed == 0)
 	        _possibleFactors = _possibleFactors.Where(x => x != 7).ToArray();
-        _factorsToAvoid = _possibleFactors.OrderBy(_ => _random.Next()).Take(3).ToArray();
+        _factorsToAvoid = _possibleFactors.OrderBy(_ => _random.Next()).Take(_goalSpeed == 0 || _initialSpeed == 0 ? 4 : 3).ToArray();
         
         var availableMaterials = OpaqueMaterials.ToList();
         _currentButtonColors = new string[6];
@@ -111,13 +117,13 @@ public class TheColoredFanScript : MonoBehaviour
 
         if (_fanBladeIsTranslucent)
         {
-	        var temp = initialSpeed;
-	        initialSpeed = _goalSpeed;
+	        var temp = _initialSpeed;
+	        _initialSpeed = _goalSpeed;
 	        _goalSpeed = temp;
         }
         
-        _fanSpeed = initialSpeed;
-        _fanTargetSpeed = initialSpeed;
+        _fanSpeed = _initialSpeed;
+        _fanTargetSpeed = _initialSpeed;
 
         _buttonValues = CalculateModifications(_currentButtonColors);
         for (var i = 0; i < buttons.Length; i++)
@@ -127,8 +133,8 @@ public class TheColoredFanScript : MonoBehaviour
         }
         
         var symbols = new List<char>();
-        if (initialSpeed != 0)
-	        symbols.Add(fanLetters[Math.Abs(initialSpeed) - 1]);
+        if (_initialSpeed != 0)
+	        symbols.Add(fanLetters[Math.Abs(_initialSpeed) - 1]);
         if (_goalSpeed != 0)
 	        symbols.Add(fanLetters[Math.Abs(_goalSpeed) - 1]);
 
@@ -152,12 +158,17 @@ public class TheColoredFanScript : MonoBehaviour
 	        goalSpeedColor = tempColor;
         }
         
-        var symbolColors = new List<string> { initialSpeedColor, goalSpeedColor };
-	    var factorColors = ColorNames.Where(x => x != initialSpeedColor && x != goalSpeedColor).OrderBy(_ => _random.Next()).ToArray();
+        var symbolColors = new List<string> ();
+        if (_initialSpeed != 0)
+	        symbolColors.Add(initialSpeedColor); 
+        if (_goalSpeed != 0)
+	        symbolColors.Add(goalSpeedColor);
+        var factorColors = ColorNames.Where(x => x != initialSpeedColor && x != goalSpeedColor).OrderBy(_ => _random.Next()).ToArray();
+
 	    var factorIndex = 0;
 	    foreach (var factor in _factorsToAvoid)
         {
-	        var displayValue = factor + factorModificationTable[fanBladeColorIndex, Array.IndexOf(ColorNames, factorColors[0])] - 1;
+	        var displayValue = factor + factorModificationTable[fanBladeColorIndex, Array.IndexOf(ColorNames, factorColors[factorIndex])] - 1;
 	        displayValue = (displayValue + 26) % 26;
 	        symbols.Add(fanLetters[displayValue]);
 	        symbolColors.Add(factorColors[factorIndex]);
@@ -169,7 +180,7 @@ public class TheColoredFanScript : MonoBehaviour
         ShuffleSymbols(symbols.ToArray(), symbolColors.ToArray(), out symbolsShuffled, out symbolColorsShuffled);
         SetSymbolColors(symbolsShuffled, symbolColorsShuffled);
         
-        Debug.LogFormat("[The Colored Fan #{0}] Initial Speed is: {1}", moduleId, initialSpeed);
+        Debug.LogFormat("[The Colored Fan #{0}] Initial Speed is: {1}", moduleId, _initialSpeed);
         Debug.LogFormat("[The Colored Fan #{0}] Goal Speed is: {1}", moduleId, _goalSpeed);
         Debug.LogFormat("[The Colored Fan #{0}] Factors to avoid: {1}", moduleId, _factorsToAvoid.Join());
         Debug.LogFormat("[The Colored Fan #{0}] Button values: {1}", moduleId, _buttonValues.Join());
