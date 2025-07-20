@@ -327,12 +327,14 @@ public class TheColoredFanScript : MonoBehaviour
 		var match = Regex.Match(command, @"^\s*(?:i|in|input)\s+([rgypbo]+)", RegexOptions.IgnoreCase);
 		if (match.Success)
 		{
+			yield return null;
 			foreach (var index in match.Groups[1].Value.Select(c => Array.FindIndex(_currentButtonColors, color => char.ToLowerInvariant(color[0]) == c)))
 				ButtonPressed(index);
 			yield return true;
 		}
 		else if (Regex.IsMatch(command, @"^\s*colorblind\s*$", RegexOptions.IgnoreCase))
 		{
+			yield return null;
 			SetColorblindMode(true);
 			yield return true;
 		}
